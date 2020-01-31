@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import numpy as np
@@ -14,7 +14,7 @@ import itertools
 get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-# In[2]:
+# In[3]:
 
 
 # Lectura de datos
@@ -22,39 +22,63 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 data = pd.read_csv('Cars93.csv')
 
 
-# In[3]:
+# In[4]:
 
 
 # Selección de target y predictores
 
 
-# In[4]:
+# In[6]:
 
 
 Y = np.array(data['Price'])
 columns = ['MPG.city', 'MPG.highway', 'EngineSize', 'Horsepower', 'RPM', 'Rev.per.mile', 
           'Fuel.tank.capacity', 'Length', 'Width', 'Turn.circle', 'Weight']
-X = np.array(data[columns])
+X = np.ones((93,12))
+X[:,:11] = np.array(data[columns])
+X[:,11] = np.array(data['Price'])
 
 
-# In[5]:
+# In[7]:
 
 
 # Renormalización de los datos para que todas las variables sean comparables
 
 
-# In[6]:
+# In[12]:
 
 
+X_scaled = np.ones((93,12))
 scaler = sklearn.preprocessing.StandardScaler()
-scaler.fit(X)
-X_scaled = scaler.transform(X)
+scaler.fit(X[:,:11])
+X_scaled[:,:11] = scaler.transform(X[:,:11])
+X_scaled[:,11] = X[:,11] 
 
 
-# In[61]:
+# In[13]:
 
 
 regresion = sklearn.linear_model.LinearRegression()
+
+
+# In[14]:
+
+
+def compute_betas(X, Y):
+    n_points = len(Y)
+    # esta es la clave del bootstrapping: la seleccion de indices de "estudiantes"
+    indices = np.random.choice(np.arange(n_points), n_points)
+    new_X = X[indices, :]
+    new_Y = Y[indices]
+    regresion = sklearn.linear_model.LinearRegression()
+    regresion.fit(new_X, new_Y)
+    return regresion.coef_
+
+
+# In[15]:
+
+
+compute_betas(X_scaled, Y)
 
 
 # In[71]:
